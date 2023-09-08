@@ -1,9 +1,17 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import logo from "./../../logo.svg";
+import "./../../App.css";
+import { useNavigate } from "react-router-dom";
 
-function App() {
+const MainApp = () => {
+  const navigate = useNavigate();
+  const Logout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
   return (
     <div className="App">
+      <button onClick={Logout}>Logout the session</button>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
@@ -20,6 +28,6 @@ function App() {
       </header>
     </div>
   );
-}
+};
 
-export default App;
+export default MainApp;
