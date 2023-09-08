@@ -17,7 +17,7 @@ function App() {
                 <MainApp />
               </GuardedRoute>
             }
-          />
+          />2
         </Routes>
       </BrowserRouter>
     </GoogleOAuthProvider>

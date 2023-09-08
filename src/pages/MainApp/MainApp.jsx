@@ -12,8 +12,8 @@ const MainApp = () => {
 
   return (
     <div className="App">
-      <button onClick={Logout}>Logout the session</button>
       <header className="App-header">
+        <button onClick={Logout}>Logout the session</button>
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.js</code> and save to reload.

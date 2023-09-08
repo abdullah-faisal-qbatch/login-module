@@ -25,7 +25,7 @@ const Login = () => {
     if (accessToken) {
       const getAccessToken = async () => {
         const response = await api.getUserData();
-        if (response !== 401) {
+        if (response.status === 200) {
           navigate("/app");
         }
       };

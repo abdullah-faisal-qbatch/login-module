@@ -32,6 +32,7 @@ api.axiosInstance.interceptors.response.use(
     return response;
   },
   async (error) => {
+    
     console.log("Error: ", error);
   }
 );
