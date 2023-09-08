@@ -4,35 +4,44 @@ import * as Yup from "yup";
 import "./Login.css";
 import api from "../../utils/axiosUtils";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
-  // Initial form values
   const navigate = useNavigate();
   const initialValues = {
     username: "",
     password: "",
   };
 
-  // Form validation schema using Yup
   const validationSchema = Yup.object({
     username: Yup.string().required("Username is required"),
     password: Yup.string().required("Password is required"),
   });
+  const [render, setRender] = useState(false);
 
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
     if (accessToken) {
-      const response = api.getUserData();
-      if (response !== 401) {
-        navigate("/app");
-      } else {
-        alert("Unauthentic user");
+      const getAccessToken = async () => {
+        const response = await api.getUserData();
+        if (response !== 401) {
+          navigate("/app");
+        }
+      };
+      getAccessToken();
+    } else {
+      const refreshToken = localStorage.getItem("refresh_token");
+      if (refreshToken) {
+        const getToken = async () => {
+          await api.refreshTokenExpired(refreshToken);
+          setRender(!render);
+        };
+        getToken();
       }
     }
-    console.log("object");
-  }, []);
+  }, [render, navigate]);
 
-  // Form submission function
   const onSubmit = async (values, { resetForm }) => {
     console.log("Form data submitted:", values);
     resetForm();
@@ -42,8 +51,7 @@ const Login = () => {
         email: values.username,
         password: values.password,
       };
-      const response = await api.login(data);
-      // console.log("RESPONSE: ", response);
+      await api.login(data);
       const userData = await api.getUserData();
       //now get user data
       console.log("Response: ", userData);
@@ -85,6 +93,14 @@ const Login = () => {
           <button type="submit">Login</button>
         </Form>
       </Formik>
+      <GoogleLogin
+        onSuccess={(credentialResponse) => {
+          console.log(credentialResponse);
+        }}
+        onError={() => {
+          console.log("Login Failed");
+        }}
+      />
     </div>
   );
 };

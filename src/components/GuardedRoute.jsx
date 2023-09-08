@@ -12,16 +12,16 @@ function AuthGuard({ children }) {
     if (accessToken) {
       const response = api.getUserData();
       if (response === 401) {
-        alert("Unauthentic user");
+        // alert("Unauthentic user");
       } else {
-        alert("Authentic user");
+        // alert("Authentic user");
         setRenderChildren(true);
       }
       return;
     }
     navigate("/login");
     alert("Please login to continue!");
-  }, []);
+  }, [navigate]);
 
   return <>{renderChildren && children}</>;
 }
