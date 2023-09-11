@@ -1,14 +1,93 @@
-import React, { useEffect } from "react";
+/* eslint-disable jsx-a11y/img-redundant-alt */
+import React, { useCallback, useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "./Login.css";
 import api from "../../utils/axiosUtils";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { GoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 const Login = () => {
+  const [user] = useState([]);
   const navigate = useNavigate();
+
+  async function responseGoogle(codeResponse) {
+    try {
+      const body = {
+        code: codeResponse.code,
+        grant_type: "authorization_code",
+        client_id:
+          "126582545391-pab79eacjtmrm5bldpg4nsadmkv3o1r8.apps.googleusercontent.com",
+        client_secret: "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",
+        redirect_uri: window.location.origin,
+      };
+      const response = await axios.post(
+        "https://oauth2.googleapis.com/token",
+        body
+      );
+      localStorage.setItem("access_token", response.data.access_token);
+      localStorage.setItem("refresh_token", response.data.refresh_token);
+      localStorage.setItem("loginMethod", "google");
+
+      const profile = await api.axiosInstance.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo"
+      );
+      console.log("profile", profile.data);
+
+      localStorage.setItem("profile", JSON.stringify(profile.data));
+
+      navigate("/app");
+      console.log("Google login successful!");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const login = useGoogleLogin({
+    flow: "auth-code",
+    onSuccess: responseGoogle,
+    onError: (error) => console.log("Login Failed:", error),
+  });
+
+  const getUserData = useCallback(
+    async (user) => {
+      try {
+        console.log("user data: ", user);
+        const res = await api.googleLogin(user);
+        localStorage.setItem("profile", JSON.stringify(res.data));
+        navigate("/app");
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [navigate]
+  );
+
+  const updateGoogleToken = useCallback(async (refreshToken) => {
+    const body = {
+      grant_type: "refresh_token",
+      client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+      client_secret: process.env.REACT_APP_GOOGLE_CLIENT_SECRET,
+      refresh_token: refreshToken,
+    };
+
+    const refreshResponse = await api.axiosInstance.post(
+      "https://oauth2.googleapis.com/token",
+      body
+    );
+
+    const newAccessToken = refreshResponse.data.access_token;
+    localStorage.setItem("access_token", newAccessToken);
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      getUserData(user);
+    }
+  }, [user, getUserData]);
+
   const initialValues = {
     username: "",
     password: "",
@@ -25,7 +104,7 @@ const Login = () => {
     if (accessToken) {
       const getAccessToken = async () => {
         const response = await api.getUserData();
-        if (response.status === 200) {
+        if (response?.status === 200) {
           navigate("/app");
         }
       };
@@ -33,14 +112,18 @@ const Login = () => {
     } else {
       const refreshToken = localStorage.getItem("refresh_token");
       if (refreshToken) {
-        const getToken = async () => {
-          await api.refreshTokenExpired(refreshToken);
-          setRender(!render);
-        };
-        getToken();
+        if (localStorage.getItem("loginMethod") === "google") {
+          updateGoogleToken(refreshToken);
+        } else {
+          const getToken = async () => {
+            await api.refreshTokenExpired(refreshToken);
+            setRender(!render);
+          };
+          getToken();
+        }
       }
     }
-  }, [render, navigate]);
+  }, [render, navigate, updateGoogleToken]);
 
   const onSubmit = async (values, { resetForm }) => {
     console.log("Form data submitted:", values);
@@ -93,14 +176,14 @@ const Login = () => {
           <button type="submit">Login</button>
         </Form>
       </Formik>
-      <GoogleLogin
-        onSuccess={(credentialResponse) => {
-          console.log(credentialResponse);
+      <div
+        style={{
+          marginTop: "10px",
+          marginLeft: "60px",
         }}
-        onError={() => {
-          console.log("Login Failed");
-        }}
-      />
+      >
+        <button onClick={() => login()}>Sign in with Google 🚀 </button>
+      </div>
     </div>
   );
 };

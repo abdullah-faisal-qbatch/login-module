@@ -9,8 +9,11 @@ function AuthGuard({ children }) {
 
   const checkAccessToken = useCallback(async () => {
     try {
-      await api.getUserData();
-      setRenderChildren(true);
+      if (localStorage.getItem("loginMethod") !== "google") {
+        await api.getUserData();
+        setRenderChildren(true);
+      } else {
+      }
     } catch (error) {
       if (error.response.status === 401) {
         navigate("/login");
@@ -21,7 +24,7 @@ function AuthGuard({ children }) {
 
   useEffect(() => {
     const accessToken = localStorage.access_token;
-    if (!accessToken) {
+    if (!accessToken && !localStorage.profile) {
       navigate("/login");
       alert("Please login to continue!");
       return;

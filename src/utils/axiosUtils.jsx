@@ -4,6 +4,16 @@ const api = {
   axiosInstance: axios.create({
     baseURL: "https://api.escuelajs.co/api/v1/auth/",
   }),
+  axiosGoogle: axios.create({
+    baseURL: "https://www.googleapis.com/oauth2/v1/userinfo",
+  }),
+  googleLogin: async (user) =>
+    api.axiosGoogle.get(`?access_token=${user.access_token}`, {
+      headers: {
+        Authorization: `Bearer ${user.access_token}`,
+        Accept: "application/json",
+      },
+    }),
   login: async (data) => api.axiosInstance.post("/login", data),
   refreshTokenExpired: async (refreshToken) =>
     api.axiosInstance.post("/refresh-token", {
@@ -32,7 +42,6 @@ api.axiosInstance.interceptors.response.use(
     return response;
   },
   async (error) => {
-    
     console.log("Error: ", error);
   }
 );
