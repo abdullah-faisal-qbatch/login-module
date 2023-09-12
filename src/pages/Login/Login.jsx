@@ -50,21 +50,6 @@ const Login = () => {
     onError: (error) => console.log("Login Failed:", error),
   });
 
-  // const getUserData = useCallback(
-  //   async (user) => {
-  //     try {
-  //       console.log("user data: ", user);
-  //       const res = await api.googleLogin(user);
-  //       console.log("user response: ", res.data);
-  //       localStorage.setItem("profile", JSON.stringify(res.data));
-  //       navigate("/app");
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   },
-  //   [navigate]
-  // );
-
   const updateGoogleToken = useCallback(async (refreshToken) => {
     const body = {
       grant_type: "refresh_token",

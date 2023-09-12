@@ -35,22 +35,6 @@ function AuthGuard({ children }) {
     checkAccessToken();
   }, [navigate, checkAccessToken]);
 
-  // useEffect(() => {
-  //   const accessToken = localStorage.getItem("access_token");
-  //   if (accessToken) {
-  //     const response = api.getUserData();
-  //     if (response === 401) {
-  //       // alert("Unauthentic user");
-  //     } else {
-  //       // alert("Authentic user");
-  //       setRenderChildren(true);
-  //     }
-  //     return;
-  //   }
-  //   navigate("/login");
-  //   alert("Please login to continue!");
-  // }, [navigate]);
-
   return <>{renderChildren && children}</>;
 }
 
