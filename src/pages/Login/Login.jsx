@@ -100,27 +100,28 @@ const Login = () => {
   });
   const [render, setRender] = useState(false);
 
+  const getAccessToken = async () => {
+    const response = await api.getUserData();
+    if (response?.status === 200) {
+      navigate("/app");
+    }
+  };
+  const getToken = async (refreshToken) => {
+    await api.refreshTokenExpired(refreshToken);
+    setRender(!render);
+  };
+
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
     if (accessToken) {
-      const getAccessToken = async () => {
-        const response = await api.getUserData();
-        if (response?.status === 200) {
-          navigate("/app");
-        }
-      };
-      getAccessToken();
+      if (localStorage.getItem("loginMethod") !== "google") getAccessToken();
     } else {
       const refreshToken = localStorage.getItem("refresh_token");
       if (refreshToken) {
         if (localStorage.getItem("loginMethod") === "google") {
           updateGoogleToken(refreshToken);
         } else {
-          const getToken = async () => {
-            await api.refreshTokenExpired(refreshToken);
-            setRender(!render);
-          };
-          getToken();
+          getToken(refreshToken);
         }
       }
     }
@@ -135,11 +136,14 @@ const Login = () => {
         email: values.username,
         password: values.password,
       };
-      await api.login(data);
-      const userData = await api.getUserData();
+      const response = await api.login(data);
+      if (response.status === 201) {
+        navigate("/app");
+      }
+      // console.log("RESPONSE: ", response);
+      // const userData = await api.getUserData();
       //now get user data
-      console.log("Response: ", userData);
-      navigate("/app");
+      // console.log("Response: ", userData);
     } catch (err) {
       console.log(err);
     }
