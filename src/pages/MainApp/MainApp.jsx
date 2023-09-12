@@ -11,8 +11,6 @@ const MainApp = () => {
     JSON.parse(localStorage.getItem("profile"))
   );
 
-  console.log("here");
-
   useEffect(() => {
     console.log("current profile: ", profile);
   }, [profile]);
@@ -39,21 +37,20 @@ const MainApp = () => {
           Learn React
         </a>
       </header>
-      {console.log("jere")}
-      {/* {profile && (
+      {profile && (
         <div
           style={{
             marginTop: "10px",
           }}
         >
-          <img src={profile.picture} alt="user image" />
+          <img src={profile?.picture || profile?.avatar} alt="user image" />
           <h3>User Logged in</h3>
           <p>Name: {profile.name}</p>
           <p>Email Address: {profile.email}</p>
           <br />
           <br />
         </div>
-      )} */}
+      )}
     </div>
   );
 };

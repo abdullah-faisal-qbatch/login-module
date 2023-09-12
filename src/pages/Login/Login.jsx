@@ -10,7 +10,6 @@ import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 
 const Login = () => {
-  const [user] = useState([]);
   const navigate = useNavigate();
 
   async function responseGoogle(codeResponse) {
@@ -51,25 +50,27 @@ const Login = () => {
     onError: (error) => console.log("Login Failed:", error),
   });
 
-  const getUserData = useCallback(
-    async (user) => {
-      try {
-        console.log("user data: ", user);
-        const res = await api.googleLogin(user);
-        localStorage.setItem("profile", JSON.stringify(res.data));
-        navigate("/app");
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    [navigate]
-  );
+  // const getUserData = useCallback(
+  //   async (user) => {
+  //     try {
+  //       console.log("user data: ", user);
+  //       const res = await api.googleLogin(user);
+  //       console.log("user response: ", res.data);
+  //       localStorage.setItem("profile", JSON.stringify(res.data));
+  //       navigate("/app");
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   },
+  //   [navigate]
+  // );
 
   const updateGoogleToken = useCallback(async (refreshToken) => {
     const body = {
       grant_type: "refresh_token",
-      client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-      client_secret: process.env.REACT_APP_GOOGLE_CLIENT_SECRET,
+      client_id:
+        "126582545391-pab79eacjtmrm5bldpg4nsadmkv3o1r8.apps.googleusercontent.com",
+      client_secret: "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",
       refresh_token: refreshToken,
     };
 
@@ -83,10 +84,10 @@ const Login = () => {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      getUserData(user);
+    if (localStorage.getItem("profile")) {
+      navigate("/app");
     }
-  }, [user, getUserData]);
+  }, [navigate]);
 
   const initialValues = {
     username: "",

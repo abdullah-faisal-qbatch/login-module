@@ -10,9 +10,12 @@ function AuthGuard({ children }) {
   const checkAccessToken = useCallback(async () => {
     try {
       if (localStorage.getItem("loginMethod") !== "google") {
-        await api.getUserData();
+        const data = await api.getUserData();
+        console.log("object: ", data.data);
+        localStorage.setItem("profile", JSON.stringify(data.data));
         setRenderChildren(true);
       } else {
+        setRenderChildren(true);
       }
     } catch (error) {
       if (error.response.status === 401) {
