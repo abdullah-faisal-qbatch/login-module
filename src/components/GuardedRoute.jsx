@@ -8,20 +8,22 @@ function AuthGuard({ children }) {
   const navigate = useNavigate();
 
   const checkAccessToken = useCallback(async () => {
-    try {
-      if (localStorage.getItem("loginMethod") !== "google") {
+    if (localStorage.getItem("loginMethod") !== "google") {
+      try {
         const data = await api.getUserData();
         console.log("object: ", data.data);
         localStorage.setItem("profile", JSON.stringify(data.data));
         setRenderChildren(true);
-      } else {
-        setRenderChildren(true);
+      } catch (error) {
+        if (error.response.status === 401) {
+          navigate("/login");
+          alert("Please login to continue!");
+        }
       }
-    } catch (error) {
-      if (error.response.status === 401) {
-        navigate("/login");
-        alert("Please login to continue!");
-      }
+    } else if (localStorage.getItem("profile")) {
+      setRenderChildren(true);
+    } else {
+      alert("User not authenticated!");
     }
   }, [navigate]);
 

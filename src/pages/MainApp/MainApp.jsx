@@ -7,9 +7,10 @@ import { useState, useEffect } from "react";
 
 const MainApp = () => {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(
-    JSON.parse(localStorage.getItem("profile"))
-  );
+  // const [profile, setProfile] = useState(
+  //   JSON.parse(localStorage.getItem("profile"))
+  // );
+  const [profile] = useState(JSON.parse(localStorage.getItem("profile")));
 
   useEffect(() => {
     console.log("current profile: ", profile);

@@ -69,7 +69,7 @@ const Login = () => {
   }, []);
 
   useEffect(() => {
-    if (localStorage.getItem("profile")) {
+    if (localStorage.profile) {
       navigate("/app");
     }
   }, [navigate]);
@@ -85,32 +85,41 @@ const Login = () => {
   });
   const [render, setRender] = useState(false);
 
-  const getAccessToken = async () => {
+  const storeUserData = useCallback(async () => {
     const response = await api.getUserData();
     if (response?.status === 200) {
       navigate("/app");
     }
-  };
-  const getToken = async (refreshToken) => {
-    await api.refreshTokenExpired(refreshToken);
-    setRender(!render);
-  };
+  }, [navigate]);
+  const updateLocalUserToken = useCallback(
+    async (refreshToken) => {
+      await api.refreshTokenExpired(refreshToken);
+      setRender(!render);
+    },
+    [render]
+  );
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("access_token");
+    const accessToken = localStorage.access_token;
     if (accessToken) {
-      if (localStorage.getItem("loginMethod") !== "google") getAccessToken();
+      if (localStorage.getItem("loginMethod") !== "google") storeUserData();
     } else {
-      const refreshToken = localStorage.getItem("refresh_token");
+      const refreshToken = localStorage.refresh_token;
       if (refreshToken) {
         if (localStorage.getItem("loginMethod") === "google") {
           updateGoogleToken(refreshToken);
         } else {
-          getToken(refreshToken);
+          updateLocalUserToken(refreshToken);
         }
       }
     }
-  }, [render, navigate, updateGoogleToken]);
+  }, [
+    render,
+    navigate,
+    updateGoogleToken,
+    storeUserData,
+    updateLocalUserToken,
+  ]);
 
   const onSubmit = async (values, { resetForm }) => {
     console.log("Form data submitted:", values);
@@ -124,11 +133,9 @@ const Login = () => {
       const response = await api.login(data);
       if (response.status === 201) {
         navigate("/app");
+      } else {
+        alert("Invalid Credentials!");
       }
-      // console.log("RESPONSE: ", response);
-      // const userData = await api.getUserData();
-      //now get user data
-      // console.log("Response: ", userData);
     } catch (err) {
       console.log(err);
     }
